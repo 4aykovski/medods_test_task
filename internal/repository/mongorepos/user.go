@@ -1,4 +1,4 @@
-package mongo
+package mongorepos
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func NewUserRepository(db *mongo.Database) *UserRepository {
 }
 
 func (repo *UserRepository) Insert(ctx context.Context, user *model.User) error {
-	const op = "internal.repository.mongo.user.Insert"
+	const op = "internal.repository.mongorepos.user.Insert"
 
 	_, err := repo.db.InsertOne(ctx, user)
 	if err != nil {
@@ -40,7 +40,7 @@ func (repo *UserRepository) Insert(ctx context.Context, user *model.User) error 
 }
 
 func (repo *UserRepository) FindByGUID(ctx context.Context, guid string) (*model.User, error) {
-	const op = "internal.repository.mongo.user.FindByGUID"
+	const op = "internal.repository.mongorepos.user.FindByGUID"
 
 	filter := bson.D{{"guid", guid}}
 

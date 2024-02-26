@@ -1,4 +1,4 @@
-package mongo
+package mongorepos
 
 const (
 	usersCollection          = "users"
