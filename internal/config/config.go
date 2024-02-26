@@ -13,9 +13,10 @@ type HTTPServer struct {
 }
 
 type Mongodb struct {
-	Host string
-	Port int
-	URI  string
+	Host     string
+	Port     int
+	Database string
+	URI      string
 }
 
 func MustLoad() *Config {
@@ -24,8 +25,9 @@ func MustLoad() *Config {
 		Secret:     "get_secret_from_env",
 		HTTPServer: HTTPServer{Address: "localhost:8080"},
 		Mongodb: Mongodb{
-			Host: "localhost",
-			Port: 27017,
+			Host:     "localhost",
+			Port:     27017,
+			Database: "medods_test_task",
 		},
 	}
 
