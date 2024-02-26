@@ -1,4 +1,4 @@
-package mongo
+package mongorepos
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func NewRefreshSessionsRepository(db *mongo.Database) *RefreshSessionRepository 
 }
 
 func (repo *RefreshSessionRepository) Insert(ctx context.Context, session model.RefreshSession) error {
-	const op = "internal.repository.mongo.refresh_session.Insert"
+	const op = "internal.repository.mongorepos.refresh_session.Insert"
 
 	_, err := repo.db.InsertOne(ctx, session)
 	if err != nil {
@@ -40,7 +40,7 @@ func (repo *RefreshSessionRepository) Insert(ctx context.Context, session model.
 }
 
 func (repo *RefreshSessionRepository) FindByToken(ctx context.Context, token string) (*model.RefreshSession, error) {
-	const op = "internal.repository.mongo.refresh_session.FindByToken"
+	const op = "internal.repository.mongorepos.refresh_session.FindByToken"
 
 	filter := bson.D{{"refresh_token", token}}
 
@@ -58,7 +58,7 @@ func (repo *RefreshSessionRepository) FindByToken(ctx context.Context, token str
 }
 
 func (repo *RefreshSessionRepository) DeleteByToken(ctx context.Context, token string) error {
-	const op = "internal.repository.mongo.refresh_session.DeleteByToken"
+	const op = "internal.repository.mongorepos.refresh_session.DeleteByToken"
 
 	filter := bson.D{{"refresh_token", token}}
 
