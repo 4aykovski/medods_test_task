@@ -11,17 +11,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type UsersRepository struct {
+type UserRepository struct {
 	db *mongo.Collection
 }
 
-func NewUserRepository(db *mongo.Database) *UsersRepository {
-	return &UsersRepository{
+func NewUserRepository(db *mongo.Database) *UserRepository {
+	return &UserRepository{
 		db: db.Collection(usersCollection),
 	}
 }
 
-func (repo *UsersRepository) Insert(ctx context.Context, user *model.User) error {
+func (repo *UserRepository) Insert(ctx context.Context, user *model.User) error {
 	const op = "internal.repository.mongo.user.Insert"
 
 	_, err := repo.db.InsertOne(ctx, user)
@@ -39,7 +39,7 @@ func (repo *UsersRepository) Insert(ctx context.Context, user *model.User) error
 	return nil
 }
 
-func (repo *UsersRepository) FindByGUID(ctx context.Context, guid string) (*model.User, error) {
+func (repo *UserRepository) FindByGUID(ctx context.Context, guid string) (*model.User, error) {
 	const op = "internal.repository.mongo.user.FindByGUID"
 
 	filter := bson.D{{"guid", guid}}
