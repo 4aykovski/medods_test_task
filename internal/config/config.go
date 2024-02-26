@@ -1,11 +1,16 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Config struct {
-	Secret     string
-	HTTPServer HTTPServer
-	Mongodb    Mongodb
+	Secret          string
+	HTTPServer      HTTPServer
+	Mongodb         Mongodb
+	AccessTokenTTL  time.Duration
+	RefreshTokenTTL time.Duration
 }
 
 type HTTPServer struct {
@@ -31,7 +36,7 @@ func MustLoad() *Config {
 		},
 	}
 
-	cfg.Mongodb.URI = fmt.Sprintf("mongodb://%s:%s", cfg.Mongodb.Host, cfg.Mongodb.Port)
+	cfg.Mongodb.URI = fmt.Sprintf("mongodb://%s:%d", cfg.Mongodb.Host, cfg.Mongodb.Port)
 
 	return cfg
 }
