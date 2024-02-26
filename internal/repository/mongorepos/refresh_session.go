@@ -39,10 +39,10 @@ func (repo *RefreshSessionRepository) Insert(ctx context.Context, session model.
 	return nil
 }
 
-func (repo *RefreshSessionRepository) FindByToken(ctx context.Context, token string) (*model.RefreshSession, error) {
+func (repo *RefreshSessionRepository) FindByGUID(ctx context.Context, GUID string) (*model.RefreshSession, error) {
 	const op = "internal.repository.mongorepos.refresh_session.FindByToken"
 
-	filter := bson.D{{"refresh_token", token}}
+	filter := bson.D{{"guid", GUID}}
 
 	var session model.RefreshSession
 	err := repo.db.FindOne(ctx, filter).Decode(&session)
