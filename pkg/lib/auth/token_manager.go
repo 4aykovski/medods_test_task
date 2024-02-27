@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -25,7 +26,7 @@ func (m *Manager) CreateTokensPair(userId string, accessTokenTtl, refreshTokenTt
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	refreshToken, err := m.newRefreshToken(userId, refreshTokenTtl)
+	refreshToken, err := m.newRefreshToken(userId)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -75,13 +76,17 @@ func (m *Manager) newJWT(userId string, ttl time.Duration) (string, error) {
 	return completeToken, nil
 }
 
-func (m *Manager) newRefreshToken(userId string, ttl time.Duration) (string, error) {
+func (m *Manager) newRefreshToken(userId string) (string, error) {
 	const op = "pkg.lib.auth.token_manager.newRefreshToken"
 
-	refreshToken, err := m.newJWT(userId, ttl)
-	if err != nil {
+	b := make([]byte, 7)
+
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s)
+
+	if _, err := r.Read(b); err != nil {
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return refreshToken, nil
+	return fmt.Sprintf("%s-%x", userId, b), nil
 }
