@@ -79,14 +79,14 @@ func (m *Manager) newJWT(userId string, ttl time.Duration) (string, error) {
 func (m *Manager) newRefreshToken(userId string) (string, error) {
 	const op = "pkg.lib.auth.token_manager.newRefreshToken"
 
-	b := make([]byte, 7)
+	buffer := make([]byte, 7)
 
-	s := rand.NewSource(time.Now().Unix())
-	r := rand.New(s)
+	seed := rand.NewSource(time.Now().Unix())
+	randGen := rand.New(seed)
 
-	if _, err := r.Read(b); err != nil {
+	if _, err := randGen.Read(buffer); err != nil {
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return fmt.Sprintf("%s-%x", userId, b), nil
+	return fmt.Sprintf("%s-%x", userId, buffer), nil
 }
