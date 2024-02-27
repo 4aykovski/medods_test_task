@@ -73,22 +73,26 @@ func (service *RefreshSessionService) CreateRefreshSession(ctx context.Context, 
 func (service *RefreshSessionService) ValidateRefreshSession(ctx context.Context, GUID string, token string) error {
 	const op = "internal.services.refresh_session.ValidateRefreshSession"
 
-	session, err := service.refreshSessionRepo.FindByGUID(ctx, GUID)
+	sessions, err := service.refreshSessionRepo.FindAllUserSessions(ctx, GUID)
 	if err != nil {
+		if errors.Is(err, repository.ErrUserSessionsNotFound) {
+			return ErrWrongCred
+		}
+
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	ok := service.hasher.CompareHash(session.RefreshToken, token)
-	if !ok {
+	session := service.getValidSession(sessions, token)
+	if session == nil {
 		return ErrWrongCred
 	}
 
-	err = service.refreshSessionRepo.DeleteByToken(ctx, token)
+	err = service.refreshSessionRepo.DeleteByToken(ctx, session.RefreshToken)
 	if err != nil && !errors.Is(err, repository.ErrSessionNotFound) {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	ok = service.isSessionExpired(session)
+	ok := service.isSessionExpired(session)
 	if !ok {
 		return ErrWrongCred
 	}
@@ -104,7 +108,7 @@ func (service *RefreshSessionService) deleteExcessSession(ctx context.Context, G
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	if len(sessions) > service.maxSessionCount {
+	if len(sessions) >= service.maxSessionCount {
 		sort.Slice(sessions, func(i, j int) bool { return sessions[i].ExpiresIn.Time().Before(sessions[j].ExpiresIn.Time()) })
 
 		err = service.refreshSessionRepo.DeleteByToken(ctx, sessions[0].RefreshToken)
@@ -118,4 +122,16 @@ func (service *RefreshSessionService) deleteExcessSession(ctx context.Context, G
 
 func (service *RefreshSessionService) isSessionExpired(session *model.RefreshSession) bool {
 	return session.ExpiresIn.Time().After(time.Now())
+}
+
+func (service *RefreshSessionService) getValidSession(sessions []model.RefreshSession, token string) *model.RefreshSession {
+	var validSession *model.RefreshSession
+	for _, session := range sessions {
+		ok := service.hasher.CompareHash(session.RefreshToken, token)
+		if ok {
+			validSession = &session
+		}
+	}
+
+	return validSession
 }
