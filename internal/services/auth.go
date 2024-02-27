@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/4aykovksi/medods_test_task/internal/model"
@@ -96,7 +97,7 @@ func (service *AuthService) Refresh(ctx context.Context, base64token string) (*a
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	GUID := string(token[0 : len(token)-15])
+	GUID := service.getGUIDFromToken(token)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -150,4 +151,9 @@ func (service *AuthService) decodeBase64Token(base64token string) ([]byte, error
 	}
 
 	return token, nil
+}
+
+func (service *AuthService) getGUIDFromToken(token []byte) string {
+	delimiterIndex := strings.LastIndexAny(string(token), "-")
+	return string(token[0:delimiterIndex])
 }

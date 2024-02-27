@@ -124,13 +124,13 @@ func (service *RefreshSessionService) isSessionExpired(session *model.RefreshSes
 }
 
 func (service *RefreshSessionService) getValidSession(sessions []model.RefreshSession, token string) *model.RefreshSession {
-	var validSession *model.RefreshSession
+	var validSession model.RefreshSession
 	for _, session := range sessions {
 		ok := service.hasher.CompareHash(session.RefreshToken, token)
 		if ok {
-			validSession = &session
+			validSession = session
 		}
 	}
 
-	return validSession
+	return &validSession
 }

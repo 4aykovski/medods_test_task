@@ -44,3 +44,5 @@ func MustLoad() *Config {
 
 	return cfg
 }
+
+// YmFiMDgzMDgtZTQ3Yy00YzBkLWIyNTgtZTJlYWFmMDA3NDJmLTgxMzMzOGQ4YzllZGNi
