@@ -57,6 +57,29 @@ func (repo *RefreshSessionRepository) FindByGUID(ctx context.Context, GUID strin
 	return &session, nil
 }
 
+func (repo *RefreshSessionRepository) FindAllUserSessions(ctx context.Context, GUID string) ([]model.RefreshSession, error) {
+	const op = "internal.repository.mongorepos.refresh_session.FindAllUserSessions"
+
+	filter := bson.D{{"guid", GUID}}
+
+	var sessions []model.RefreshSession
+	cursor, err := repo.db.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if cursor.RemainingBatchLength() == 0 {
+		return nil, repository.ErrUserSessionsNotFound
+	}
+
+	err = cursor.All(ctx, &sessions)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return sessions, err
+}
+
 func (repo *RefreshSessionRepository) DeleteByToken(ctx context.Context, token string) error {
 	const op = "internal.repository.mongorepos.refresh_session.DeleteByToken"
 
