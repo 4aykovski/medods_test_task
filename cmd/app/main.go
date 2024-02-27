@@ -40,7 +40,7 @@ func main() {
 	bcryptHasher := hasher.NewBcryptHasher()
 	tokenManager := auth.NewManager(cfg.Secret)
 
-	sessionService := services.NewRefreshSessionService(sessionRepo, bcryptHasher, 3)
+	sessionService := services.NewRefreshSessionService(sessionRepo, bcryptHasher, cfg.MaxSessionCount)
 	authService := services.NewAuthService(userRepo, sessionService, tokenManager, bcryptHasher, cfg.AccessTokenTTL, cfg.RefreshTokenTTL)
 
 	// init router
