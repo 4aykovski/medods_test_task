@@ -33,7 +33,7 @@ func (m *Manager) CreateTokensPair(userId string, accessTokenTtl, refreshTokenTt
 	return &Tokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    time.Now().Add(accessTokenTtl),
+		ExpiresIn:    time.Now().Add(refreshTokenTtl),
 	}, nil
 }
 
@@ -62,7 +62,7 @@ func (m *Manager) Parse(inputToken string) (string, error) {
 func (m *Manager) newJWT(userId string, ttl time.Duration) (string, error) {
 	const op = "pkg.lib.auth.token_manager.newJWT"
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS512, jwt.StandardClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(ttl).Unix(),
 		Subject:   userId,
 	})
