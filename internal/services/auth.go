@@ -96,12 +96,12 @@ func (service *AuthService) Refresh(ctx context.Context, base64token string) (*a
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	GUID, err := service.tokenManager.Parse(token)
+	GUID := string(token[0 : len(token)-15])
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	err = service.refreshSessionService.ValidateRefreshSession(ctx, GUID, token)
+	err = service.refreshSessionService.ValidateRefreshSession(ctx, GUID, string(token))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
@@ -127,7 +127,7 @@ func (service *AuthService) getTokensPair(ctx context.Context, GUID string) (*au
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	err = service.refreshSessionService.CreateRefreshSession(ctx, hashedRefreshToken, GUID, service.refreshTokenTTL)
+	err = service.refreshSessionService.CreateRefreshSession(ctx, GUID, hashedRefreshToken, service.refreshTokenTTL)
 	if err != nil {
 		if errors.Is(err, repository.ErrSessionAlreadyExists) {
 			return nil, repository.ErrSessionAlreadyExists
@@ -141,13 +141,13 @@ func (service *AuthService) getTokensPair(ctx context.Context, GUID string) (*au
 	return tokens, nil
 }
 
-func (service *AuthService) decodeBase64Token(base64token string) (string, error) {
+func (service *AuthService) decodeBase64Token(base64token string) ([]byte, error) {
 	const op = "internal.services.auth.decodeBase64Token"
 
 	token, err := base64.StdEncoding.DecodeString(base64token)
 	if err != nil {
-		return "", fmt.Errorf("%s: %w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return string(token), nil
+	return token, nil
 }
