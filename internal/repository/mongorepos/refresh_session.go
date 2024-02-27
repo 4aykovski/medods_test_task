@@ -39,24 +39,6 @@ func (repo *RefreshSessionRepository) Insert(ctx context.Context, session model.
 	return nil
 }
 
-func (repo *RefreshSessionRepository) FindByGUID(ctx context.Context, GUID string) (*model.RefreshSession, error) {
-	const op = "internal.repository.mongorepos.refresh_session.FindByToken"
-
-	filter := bson.D{{"guid", GUID}}
-
-	var session model.RefreshSession
-	err := repo.db.FindOne(ctx, filter).Decode(&session)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, repository.ErrSessionNotFound
-		}
-
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return &session, nil
-}
-
 func (repo *RefreshSessionRepository) FindAllUserSessions(ctx context.Context, GUID string) ([]model.RefreshSession, error) {
 	const op = "internal.repository.mongorepos.refresh_session.FindAllUserSessions"
 

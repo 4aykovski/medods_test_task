@@ -19,7 +19,6 @@ var (
 type refreshSessionRepository interface {
 	Insert(ctx context.Context, session model.RefreshSession) error
 	DeleteByToken(ctx context.Context, token string) error
-	FindByGUID(ctx context.Context, token string) (*model.RefreshSession, error)
 	FindAllUserSessions(ctx context.Context, GUID string) ([]model.RefreshSession, error)
 }
 
