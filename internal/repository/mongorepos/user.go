@@ -21,24 +21,6 @@ func NewUserRepository(db *mongo.Database) *UserRepository {
 	}
 }
 
-func (repo *UserRepository) Insert(ctx context.Context, user *model.User) error {
-	const op = "internal.repository.mongorepos.user.Insert"
-
-	_, err := repo.db.InsertOne(ctx, user)
-	if err != nil {
-		var mongoErr mongo.WriteError
-		if errors.As(err, &mongoErr) {
-			if mongoErr.Code == 11000 {
-				return repository.ErrUserAlreadyExists
-			}
-		}
-
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
-	return nil
-}
-
 func (repo *UserRepository) FindByGUID(ctx context.Context, guid string) (*model.User, error) {
 	const op = "internal.repository.mongorepos.user.FindByGUID"
 
