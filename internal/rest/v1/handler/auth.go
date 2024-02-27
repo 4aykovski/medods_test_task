@@ -57,7 +57,7 @@ func (h *AuthHandler) SignIn(log *slog.Logger) http.HandlerFunc {
 		const op = "rest.v1.handler.auth.SignIn"
 
 		// TODO: add middleware to logging request processing
-		log = log.With(slog.String("op", op))
+		log := log.With(slog.String("op", op))
 		log.Info("start processing request")
 
 		deleteCookie := h.newRefreshCookie("", time.Now())
@@ -128,7 +128,7 @@ func (h *AuthHandler) Refresh(log *slog.Logger) http.HandlerFunc {
 		const op = "rest.v1.handler.auth.Refresh"
 
 		// TODO: add middleware to logging request processing
-		log = log.With(slog.String("op", op))
+		log := log.With(slog.String("op", op))
 		log.Info("start processing request")
 
 		w.Header().Set("Content-Type", "application/json")

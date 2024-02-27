@@ -94,12 +94,12 @@ func (service *AuthService) Refresh(ctx context.Context, base64token string) (*a
 
 	token, err := service.decodeBase64Token(base64token)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil, ErrWrongCred
 	}
 
-	GUID := service.getGUIDFromToken(token)
+	GUID, err := service.getGUIDFromToken(token)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil, ErrWrongCred
 	}
 
 	err = service.refreshSessionService.ValidateRefreshSession(ctx, GUID, string(token))
@@ -153,7 +153,11 @@ func (service *AuthService) decodeBase64Token(base64token string) ([]byte, error
 	return token, nil
 }
 
-func (service *AuthService) getGUIDFromToken(token []byte) string {
+func (service *AuthService) getGUIDFromToken(token []byte) (string, error) {
 	delimiterIndex := strings.LastIndexAny(string(token), "-")
-	return string(token[0:delimiterIndex])
+	if delimiterIndex < 0 {
+		return "", ErrWrongCred
+	}
+
+	return string(token[0:delimiterIndex]), nil
 }
