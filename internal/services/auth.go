@@ -3,10 +3,12 @@ package services
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/4aykovksi/medods_test_task/internal/model"
+	"github.com/4aykovksi/medods_test_task/internal/repository"
 	"github.com/4aykovksi/medods_test_task/pkg/lib/auth"
 )
 
@@ -29,7 +31,7 @@ type hasher interface {
 	CompareHash(hash string, input string) bool
 }
 
-type UserService struct {
+type AuthService struct {
 	userRepo              userRepository
 	refreshSessionService refreshSessionService
 
@@ -40,15 +42,15 @@ type UserService struct {
 	refreshTokenTTL time.Duration
 }
 
-func NewUserService(
+func NewAuthService(
 	userRepo userRepository,
 	sessionService refreshSessionService,
 	manager tokenManager,
 	hasher hasher,
 	accessTokenTTL time.Duration,
 	refreshTokenTTL time.Duration,
-) *UserService {
-	return &UserService{
+) *AuthService {
+	return &AuthService{
 		userRepo:              userRepo,
 		refreshSessionService: sessionService,
 		tokenManager:          manager,
@@ -58,28 +60,36 @@ func NewUserService(
 	}
 }
 
-type userSignInInput struct {
+type AuthSignInInput struct {
 	GUID string
 }
 
-func (service *UserService) SignIn(ctx context.Context, input userSignInInput) (*auth.Tokens, error) {
-	const op = "internal.services.user.SignIn"
+func (service *AuthService) SignIn(ctx context.Context, input AuthSignInInput) (*auth.Tokens, error) {
+	const op = "internal.services.auth.SignIn"
 
 	user, err := service.userRepo.FindByGUID(ctx, input.GUID)
 	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return nil, repository.ErrUserNotFound
+		}
+
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	tokens, err := service.getTokensPair(ctx, user.GUID)
 	if err != nil {
+		if errors.Is(err, repository.ErrSessionAlreadyExists) {
+			return nil, repository.ErrSessionAlreadyExists
+		}
+
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return tokens, nil
 }
 
-func (service *UserService) Refresh(ctx context.Context, base64token string) (*auth.Tokens, error) {
-	const op = "internal.services.user.Refresh"
+func (service *AuthService) Refresh(ctx context.Context, base64token string) (*auth.Tokens, error) {
+	const op = "internal.services.auth.Refresh"
 
 	token, err := service.decodeBase64Token(base64token)
 	if err != nil {
@@ -104,8 +114,8 @@ func (service *UserService) Refresh(ctx context.Context, base64token string) (*a
 	return tokens, nil
 }
 
-func (service *UserService) getTokensPair(ctx context.Context, GUID string) (*auth.Tokens, error) {
-	const op = "internal.services.user.getTokensPair"
+func (service *AuthService) getTokensPair(ctx context.Context, GUID string) (*auth.Tokens, error) {
+	const op = "internal.services.auth.getTokensPair"
 
 	tokens, err := service.tokenManager.CreateTokensPair(GUID, service.accessTokenTTL, service.refreshTokenTTL)
 	if err != nil {
@@ -119,6 +129,10 @@ func (service *UserService) getTokensPair(ctx context.Context, GUID string) (*au
 
 	err = service.refreshSessionService.CreateRefreshSession(ctx, hashedRefreshToken, GUID, service.refreshTokenTTL)
 	if err != nil {
+		if errors.Is(err, repository.ErrSessionAlreadyExists) {
+			return nil, repository.ErrSessionAlreadyExists
+		}
+
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -127,8 +141,8 @@ func (service *UserService) getTokensPair(ctx context.Context, GUID string) (*au
 	return tokens, nil
 }
 
-func (service *UserService) decodeBase64Token(base64token string) (string, error) {
-	const op = "internal.services.user.decodeBase64Token"
+func (service *AuthService) decodeBase64Token(base64token string) (string, error) {
+	const op = "internal.services.auth.decodeBase64Token"
 
 	token, err := base64.StdEncoding.DecodeString(base64token)
 	if err != nil {
