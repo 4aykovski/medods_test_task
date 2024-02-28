@@ -190,10 +190,11 @@ func (h *AuthHandler) Refresh(log *slog.Logger) http.HandlerFunc {
 
 func (h *AuthHandler) newRefreshCookie(refreshToken string, time time.Time) *http.Cookie {
 	return &http.Cookie{
-		Name:     refreshCookieName,
-		Value:    refreshToken,
-		Expires:  time,
-		Path:     refreshCookiePath,
+		Name:    refreshCookieName,
+		Value:   refreshToken,
+		Expires: time,
+		Path:    refreshCookiePath,
+		// TODO: false -> true in prod
 		Secure:   false,
 		HttpOnly: true,
 		SameSite: 3,
