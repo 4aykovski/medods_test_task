@@ -60,9 +60,6 @@ func (h *AuthHandler) SignIn(log *slog.Logger) http.HandlerFunc {
 		log := log.With(slog.String("op", op))
 		log.Info("start processing request")
 
-		deleteCookie := h.newRefreshCookie("", time.Now())
-		http.SetCookie(w, deleteCookie)
-
 		w.Header().Set("Content-Type", "application/json")
 
 		guid := r.URL.Query().Get("guid")
