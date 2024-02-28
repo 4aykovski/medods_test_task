@@ -91,7 +91,7 @@ func (service *RefreshSessionService) ValidateRefreshSession(ctx context.Context
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	ok := service.isSessionExpired(session)
+	ok := service.isSessionNotExpired(session)
 	if !ok {
 		return ErrWrongCred
 	}
@@ -119,7 +119,7 @@ func (service *RefreshSessionService) deleteExcessSession(ctx context.Context, G
 	return nil
 }
 
-func (service *RefreshSessionService) isSessionExpired(session *model.RefreshSession) bool {
+func (service *RefreshSessionService) isSessionNotExpired(session *model.RefreshSession) bool {
 	return session.ExpiresIn.Time().After(time.Now())
 }
 
