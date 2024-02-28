@@ -151,6 +151,9 @@ func (h *AuthHandler) Refresh(log *slog.Logger) http.HandlerFunc {
 			token = req.RefreshToken
 		} else {
 			token = cookie.Value
+
+			emptyCookie := h.newRefreshCookie("", time.Now())
+			http.SetCookie(w, emptyCookie)
 		}
 
 		tokens, err := h.authService.Refresh(r.Context(), token)
